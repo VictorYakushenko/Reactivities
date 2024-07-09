@@ -7,7 +7,7 @@ import { router } from "../router/Routes";
 export default class UserStore {
     user: User | null = null;
 
-    constructor(){
+    constructor() {
         makeAutoObservable(this)
     }
 
@@ -22,7 +22,7 @@ export default class UserStore {
             this.user = user;
         })
         router.navigate('/activities');
-        store.modalStore.closeModal();       
+        store.modalStore.closeModal();
     }
 
     register = async (creds: UserFormValues) => {
@@ -32,10 +32,10 @@ export default class UserStore {
             this.user = user;
         })
         router.navigate('/activities');
-        store.modalStore.closeModal();       
+        store.modalStore.closeModal();
     }
 
-    logout = () =>{
+    logout = () => {
         store.commonStore.setToken(null);
         localStorage.removeItem('jwt');
         this.user = null;
@@ -45,9 +45,15 @@ export default class UserStore {
     getUser = async () => {
         try {
             const user = await agent.Account.current();
-            runInAction(() => this.user = user)          
+            runInAction(() => this.user = user)
         } catch (error) {
             console.log(error);
+        }
+    }
+
+    setImage = (image: string) => {
+        if (this.user) {
+            this.user.image = image;
         }
     }
 }
