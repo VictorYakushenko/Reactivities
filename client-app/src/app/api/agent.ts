@@ -38,7 +38,7 @@ axios.interceptors.response.use(async response => {
     }
     return response;
 }, (error: AxiosError) => {
-    const { data, status, config } = error.response as AxiosResponse;
+    const { data, status, config, headers } = error.response as AxiosResponse;
 
     switch (status) {
         case 400:
@@ -58,7 +58,12 @@ axios.interceptors.response.use(async response => {
             }
             break;
         case 401:
-            toast.error('Unauthotised')
+            if (status === 401 && headers["www-authenticate"]?.startWith('Bearer error="invalid_token"')) {
+                store.userStore.logout();
+                toast.error("Session expired - please login again")
+            } else {
+                toast.error('Unauthotised')
+            }
             break;
         case 403:
             toast.error('Forbidden')
@@ -94,6 +99,7 @@ const Account = {
     current: () => requests.get<User>("/account"),
     login: (user: UserFormValues) => requests.post<User, UserFormValues>('/account/login', user),
     register: (user: UserFormValues) => requests.post<User, UserFormValues>('/account/register', user),
+    refreshToken: () => requests.post<User, object>('/account/refreshToken', {})
 }
 
 const Profiles = {
